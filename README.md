@@ -7,3 +7,6 @@ compiler: CCS
 simulation: PROTEUS
 
 on this code every 3 secounds change the image
+
+tutorial:
+https://www.youtube.com/watch?v=Zld1n6RwkAQ
