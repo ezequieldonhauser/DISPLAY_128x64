@@ -1,0 +1,1664 @@
+CCS PCH C Compiler, Version 4.074, 38112               08-set-15 13:52
+
+               Filename: C:\Users\User\Desktop\Nova pasta\main.lst
+
+               ROM used: 3132 bytes (10%)
+                         Largest free fragment is 29636
+               RAM used: 6 (0%) at main() level
+                         22 (1%) worst case
+               Stack:    3 locations
+
+*
+0000:  GOTO   0BBC
+.................... #include <18F452.h> 
+.................... //////// Standard Header file for the PIC18F452 device //////////////// 
+.................... #device PIC18F452 
+.................... #list 
+....................  
+.................... #FUSES NOWDT                    //No Watch Dog Timer 
+.................... #FUSES WDT128                   //Watch Dog Timer uses 1:128 Postscale 
+.................... #FUSES XT                       //High speed osc with HW enabled 4X PLL 
+.................... #FUSES NOPROTECT                //Code not protected from reading 
+.................... #FUSES NOOSCSEN                 //Oscillator switching is disabled, main oscillator is source 
+.................... #FUSES NOBROWNOUT               //No brownout reset 
+.................... #FUSES BORV20                   //Brownout reset at 2.0V 
+.................... #FUSES PUT                      //Power Up Timer 
+.................... #FUSES STVREN                   //Stack full/underflow will cause reset 
+.................... #FUSES NODEBUG                  //No Debug mode for ICD 
+.................... #FUSES NOLVP                    //No low voltage prgming, B3(PIC16) or B5(PIC18) used for I/O 
+.................... #FUSES NOWRT                    //Program memory not write protected 
+.................... #FUSES NOWRTD                   //Data EEPROM not write protected 
+.................... #FUSES NOWRTB                   //Boot block not write protected 
+.................... #FUSES NOWRTC                   //configuration not registers write protected 
+.................... #FUSES NOCPD                    //No EE protection 
+.................... #FUSES NOCPB                    //No Boot Block code protection 
+.................... #FUSES NOEBTR                   //Memory not protected from table reads 
+.................... #FUSES NOEBTRB                  //Boot block not protected from table reads 
+.................... #use delay(clock=4000000)      //cristal de 4mhz 
+*
+0B94:  CLRF   FEA
+0B96:  MOVLW  07
+0B98:  MOVWF  FE9
+0B9A:  MOVF   FEF,W
+0B9C:  BZ    0BBA
+0B9E:  MOVLW  01
+0BA0:  MOVWF  01
+0BA2:  CLRF   00
+0BA4:  DECFSZ 00,F
+0BA6:  BRA    0BA4
+0BA8:  DECFSZ 01,F
+0BAA:  BRA    0BA2
+0BAC:  MOVLW  4A
+0BAE:  MOVWF  00
+0BB0:  DECFSZ 00,F
+0BB2:  BRA    0BB0
+0BB4:  BRA    0BB6
+0BB6:  DECFSZ FEF,F
+0BB8:  BRA    0B9E
+0BBA:  RETLW  00
+....................  
+.................... //bibliotecas 
+.................... #include <LIB_HDM64GS12.c> 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... ////                           HDM64GS12.c                           //// 
+.................... ////                                                                 //// 
+.................... //// This file contains drivers for using a Hantronix HDM64GS12 with //// 
+.................... //// a KS0108 display controller. The HDM64GS12 is 128 by 64 pixels. //// 
+.................... //// The driver treats the upper left pixel as (0,0).                //// 
+.................... ////                                                                 //// 
+.................... //// Use #define FAST_GLCD if the target chip has at least 1k of RAM //// 
+.................... //// to decrease the time it takes to update the display.            //// 
+.................... //// glcd_update() must then be called to update the display after   //// 
+.................... //// changing the pixel information.                                 //// 
+.................... //// See ex_glcd.c for suggested usage.                              //// 
+.................... //// See KS0108.c for controlling a single 64 by 64 display          //// 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... ////                                                                 //// 
+.................... //// LCD Pin connections:                                            //// 
+.................... //// (These can be changed as needed in the following defines).      //// 
+.................... ////  * 1: VSS is connected to GND                                   //// 
+.................... ////  * 2: VDD is connected to +5V                                   //// 
+.................... ////  * 3: V0  - LCD operating voltage (Constrast adjustment)        //// 
+.................... ////  * 4: D/I - Data or Instruction is connected to B2              //// 
+.................... ////  * 5: R/W - Read or Write is connected to B4                    //// 
+.................... ////  * 6: Enable is connected to B5                                 //// 
+.................... ////  *7-14: Data Bus 0 to 7 is connected to port d                  //// 
+.................... ////  *15: Chip Select 1 is connected to B0                          //// 
+.................... ////  *16: Chip Select 2 is connected to B1                          //// 
+.................... ////  *17: Reset is connected to C0                                  //// 
+.................... ////  *18: Negative voltage is also connected to the 20k Ohm POT     //// 
+.................... ////  *19: Positive voltage for LED backlight is connected to +5V    //// 
+.................... ////  *20: Negavtive voltage for LED backlight is connected to GND   //// 
+.................... ////                                                                 //// 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... ////                                                                 //// 
+.................... ////  glcd_init(mode)                                                //// 
+.................... ////     * Must be called before any other function.                 //// 
+.................... ////       - mode can be ON or OFF to turn the LCD on or off         //// 
+.................... ////                                                                 //// 
+.................... ////  glcd_pixel(x,y,color)                                          //// 
+.................... ////     * Sets the pixel to the given color.                        //// 
+.................... ////       - color can be ON or OFF                                  //// 
+.................... ////                                                                 //// 
+.................... ////  glcd_fillScreen(color)                                         //// 
+.................... ////     * Fills the entire LCD with the given color.                //// 
+.................... ////       - color can be ON or OFF                                  //// 
+.................... ////                                                                 //// 
+.................... ////  glcd_update()                                                  //// 
+.................... ////     * Write the display data stored in RAM to the LCD           //// 
+.................... ////     * Only available if FAST_GLCD is defined                    //// 
+.................... ////                                                                 //// 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... ////        (C) Copyright 1996, 2004 Custom Computer Services        //// 
+.................... //// This source code may only be used by licensed users of the CCS  //// 
+.................... //// C compiler.  This source code may only be distributed to other  //// 
+.................... //// licensed users of the CCS C compiler.  No other use,            //// 
+.................... //// reproduction or distribution is permitted without written       //// 
+.................... //// permission.  Derivative programs created using this software    //// 
+.................... //// in object code form are not restricted in any way.              //// 
+.................... ///////////////////////////////////////////////////////////////////////// 
+....................  
+....................  
+....................  
+.................... #ifndef HDM64GS12 
+.................... #define HDM64GS12 
+....................  
+.................... #ifndef GLCD_WIDTH 
+.................... #define GLCD_WIDTH   128 
+.................... #endif 
+....................  
+.................... #ifndef GLCD_CS1 
+.................... #define GLCD_CS1     PIN_C0   // Chip Selection 1 
+.................... #endif 
+....................  
+.................... #ifndef GLCD_CS2 
+.................... #define GLCD_CS2     PIN_C1   // Chip Selection 2 
+.................... #endif 
+....................  
+.................... #ifndef GLCD_DI 
+.................... #define GLCD_DI      PIN_B4   // Data or Instruction input 
+.................... #endif 
+....................  
+.................... #ifndef GLCD_RW 
+.................... #define GLCD_RW      PIN_B1   // Read/Write 
+.................... #endif 
+....................  
+.................... #ifndef GLCD_E 
+.................... #define GLCD_E       PIN_B2   // Enable 
+.................... #endif 
+....................  
+.................... #ifndef GLCD_RST 
+.................... #define GLCD_RST     PIN_B3   // Reset 
+.................... #endif 
+....................  
+.................... #define GLCD_LEFT    0 
+.................... #define GLCD_RIGHT   1 
+....................  
+.................... #ifndef ON 
+.................... #define ON           1 
+.................... #endif 
+....................  
+.................... #ifndef OFF 
+.................... #define OFF          0 
+.................... #endif 
+....................  
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... // Function Prototypes 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... void glcd_init(int1 mode); 
+.................... void glcd_pixel(int8 x, int8 y, int1 color); 
+.................... void glcd_fillScreen(int1 color); 
+.................... void glcd_writeByte(int1 side, BYTE data); 
+.................... BYTE glcd_readByte(int1 side); 
+.................... void glcd_update(); 
+.................... ///////////////////////////////////////////////////////////////////////// 
+....................  
+.................... #ifdef FAST_GLCD 
+.................... struct 
+.................... { 
+....................    int8 left[512]; 
+....................    int8 right[512]; 
+.................... } displayData; 
+.................... #endif 
+....................  
+....................  
+.................... // Purpose:       Initialize the LCD. 
+.................... //                Call before using any other LCD function. 
+.................... // Inputs:        OFF - Turns the LCD off 
+.................... //                ON  - Turns the LCD on 
+.................... void glcd_init(int1 mode) 
+.................... { 
+....................    // Initialze some pins 
+....................    output_high(GLCD_RST); 
+*
+08C4:  BCF    F93.3
+08C6:  BSF    F8A.3
+....................    output_low(GLCD_E); 
+08C8:  BCF    F93.2
+08CA:  BCF    F8A.2
+....................    output_low(GLCD_CS1); 
+08CC:  BCF    F94.0
+08CE:  BCF    F8B.0
+....................    output_low(GLCD_CS2); 
+08D0:  BCF    F94.1
+08D2:  BCF    F8B.1
+....................  
+....................    output_low(GLCD_DI);                 // Set for instruction 
+08D4:  BCF    F93.4
+08D6:  BCF    F8A.4
+....................    glcd_writeByte(GLCD_LEFT,  0xC0);    // Specify first RAM line at the top 
+08D8:  CLRF   15
+08DA:  MOVLW  C0
+08DC:  MOVWF  16
+08DE:  RCALL  0820
+....................    glcd_writeByte(GLCD_RIGHT, 0xC0);    //   of the screen 
+08E0:  MOVLW  01
+08E2:  MOVWF  15
+08E4:  MOVLW  C0
+08E6:  MOVWF  16
+08E8:  RCALL  0820
+....................    glcd_writeByte(GLCD_LEFT,  0x40);    // Set the column address to 0 
+08EA:  CLRF   15
+08EC:  MOVLW  40
+08EE:  MOVWF  16
+08F0:  RCALL  0820
+....................    glcd_writeByte(GLCD_RIGHT, 0x40); 
+08F2:  MOVLW  01
+08F4:  MOVWF  15
+08F6:  MOVLW  40
+08F8:  MOVWF  16
+08FA:  RCALL  0820
+....................    glcd_writeByte(GLCD_LEFT,  0xB8);    // Set the page address to 0 
+08FC:  CLRF   15
+08FE:  MOVLW  B8
+0900:  MOVWF  16
+0902:  RCALL  0820
+....................    glcd_writeByte(GLCD_RIGHT, 0xB8); 
+0904:  MOVLW  01
+0906:  MOVWF  15
+0908:  MOVLW  B8
+090A:  MOVWF  16
+090C:  RCALL  0820
+....................  
+....................    if(mode == ON) 
+090E:  DECFSZ 06,W
+0910:  BRA    0926
+....................    { 
+....................       glcd_writeByte(GLCD_LEFT,  0x3F); // Turn the display on 
+0912:  CLRF   15
+0914:  MOVLW  3F
+0916:  MOVWF  16
+0918:  RCALL  0820
+....................       glcd_writeByte(GLCD_RIGHT, 0x3F); 
+091A:  MOVLW  01
+091C:  MOVWF  15
+091E:  MOVLW  3F
+0920:  MOVWF  16
+0922:  RCALL  0820
+....................    } 
+....................    else 
+0924:  BRA    0938
+....................    { 
+....................       glcd_writeByte(GLCD_LEFT,  0x3E); // Turn the display off 
+0926:  CLRF   15
+0928:  MOVLW  3E
+092A:  MOVWF  16
+092C:  RCALL  0820
+....................       glcd_writeByte(GLCD_RIGHT, 0x3E); 
+092E:  MOVLW  01
+0930:  MOVWF  15
+0932:  MOVLW  3E
+0934:  MOVWF  16
+0936:  RCALL  0820
+....................    } 
+....................  
+....................    glcd_fillScreen(OFF);                // Clear the display 
+0938:  CLRF   07
+093A:  RCALL  0852
+....................  
+....................    #ifdef FAST_GLCD 
+....................    glcd_update(); 
+....................    #endif 
+.................... } 
+093C:  GOTO   0C04 (RETURN)
+....................  
+....................  
+.................... // Purpose:    Update the LCD with data from the display arrays 
+.................... #ifdef FAST_GLCD 
+.................... void glcd_update() 
+.................... { 
+....................    int8 i, j; 
+....................    int8 *p1, *p2; 
+....................  
+....................    p1 = displayData.left; 
+....................    p2 = displayData.right; 
+....................  
+....................    // Loop through the vertical pages 
+....................    for(i = 0; i < 8; ++i) 
+....................    { 
+....................       output_low(GLCD_DI);                      // Set for instruction 
+....................       glcd_writeByte(GLCD_LEFT, 0x40);          // Set horizontal address to 0 
+....................       glcd_writeByte(GLCD_RIGHT, 0x40); 
+....................       glcd_writeByte(GLCD_LEFT, i | 0xB8);      // Set page address 
+....................       glcd_writeByte(GLCD_RIGHT, i | 0xB8); 
+....................       output_high(GLCD_DI);                     // Set for data 
+....................  
+....................       // Loop through the horizontal sections 
+....................       for(j = 0; j < 64; ++j) 
+....................       { 
+....................          glcd_writeByte(GLCD_LEFT, *p1++);      // Turn pixels on or off 
+....................          glcd_writeByte(GLCD_RIGHT, *p2++);     // Turn pixels on or off 
+....................       } 
+....................    } 
+.................... } 
+.................... #endif 
+....................  
+....................  
+.................... // Purpose:    Turn a pixel on a graphic LCD on or off 
+.................... // Inputs:     1) x - the x coordinate of the pixel 
+.................... //             2) y - the y coordinate of the pixel 
+.................... //             3) color - ON or OFF 
+.................... void glcd_pixel(int8 x, int8 y, int1 color) 
+.................... #ifdef FAST_GLCD 
+.................... { 
+....................    int8* p; 
+....................    int16 temp; 
+....................    temp =  y/8; 
+....................    temp *= 64; 
+....................    temp += x; 
+....................  
+....................    if(x > 63) 
+....................    { 
+....................       p = displayData.right + temp - 64; 
+....................    } 
+....................    else 
+....................    { 
+....................       p = displayData.left + temp; 
+....................    } 
+....................  
+....................    if(color) 
+....................    { 
+....................       bit_set(*p, y%8); 
+....................    } 
+....................    else 
+....................    { 
+....................       bit_clear(*p, y%8); 
+....................    } 
+.................... } 
+.................... #else 
+.................... { 
+....................    BYTE data; 
+....................    int1 side = GLCD_LEFT;  // Stores which chip to use on the LCD 
+*
+0998:  BCF    10.0
+....................  
+....................    if(x > 63)              // Check for first or second display area 
+099A:  MOVF   0C,W
+099C:  SUBLW  3F
+099E:  BC    09A6
+....................    { 
+....................       x -= 64; 
+09A0:  MOVLW  40
+09A2:  SUBWF  0C,F
+....................       side = GLCD_RIGHT; 
+09A4:  BSF    10.0
+....................    } 
+....................  
+....................    output_low(GLCD_DI);                         // Set for instruction 
+09A6:  BCF    F93.4
+09A8:  BCF    F8A.4
+....................    bit_clear(x,7);                              // Clear the MSB. Part of an instruction code 
+09AA:  BCF    0C.7
+....................    bit_set(x,6);                                // Set bit 6. Also part of an instruction code 
+09AC:  BSF    0C.6
+....................    glcd_writeByte(side, x);                     // Set the horizontal address 
+09AE:  MOVLW  00
+09B0:  BTFSC  10.0
+09B2:  MOVLW  01
+09B4:  MOVWF  15
+09B6:  MOVFF  0C,16
+09BA:  RCALL  0820
+....................    glcd_writeByte(side, (y/8 & 0xBF) | 0xB8);   // Set the vertical page address 
+09BC:  MOVLW  00
+09BE:  BTFSC  10.0
+09C0:  MOVLW  01
+09C2:  MOVWF  11
+09C4:  RRCF   0D,W
+09C6:  MOVWF  00
+09C8:  RRCF   00,F
+09CA:  RRCF   00,F
+09CC:  MOVLW  1F
+09CE:  ANDWF  00,F
+09D0:  MOVF   00,W
+09D2:  ANDLW  BF
+09D4:  IORLW  B8
+09D6:  MOVWF  14
+09D8:  MOVFF  11,15
+09DC:  MOVWF  16
+09DE:  RCALL  0820
+....................    output_high(GLCD_DI);                        // Set for data 
+09E0:  BCF    F93.4
+09E2:  BSF    F8A.4
+....................    glcd_readByte(side);                         // Need two reads to get data 
+09E4:  MOVLW  00
+09E6:  BTFSC  10.0
+09E8:  MOVLW  01
+09EA:  MOVWF  12
+09EC:  RCALL  095E
+....................    data = glcd_readByte(side);                  //  at new address 
+09EE:  MOVLW  00
+09F0:  BTFSC  10.0
+09F2:  MOVLW  01
+09F4:  MOVWF  12
+09F6:  RCALL  095E
+09F8:  MOVFF  01,0F
+....................  
+....................    if(color == ON) 
+09FC:  DECFSZ 0E,W
+09FE:  BRA    0A1E
+....................       bit_set(data, y%8);        // Turn the pixel on 
+0A00:  MOVF   0D,W
+0A02:  ANDLW  07
+0A04:  MOVWF  11
+0A06:  MOVLW  01
+0A08:  MOVWF  00
+0A0A:  MOVF   11,W
+0A0C:  MOVWF  01
+0A0E:  BZ    0A18
+0A10:  BCF    FD8.0
+0A12:  RLCF   00,F
+0A14:  DECFSZ 01,F
+0A16:  BRA    0A10
+0A18:  MOVF   00,W
+0A1A:  IORWF  0F,F
+....................    else                          // or 
+0A1C:  BRA    0A3C
+....................       bit_clear(data, y%8);      // turn the pixel off 
+0A1E:  MOVF   0D,W
+0A20:  ANDLW  07
+0A22:  MOVWF  11
+0A24:  MOVLW  01
+0A26:  MOVWF  00
+0A28:  MOVF   11,W
+0A2A:  MOVWF  01
+0A2C:  BZ    0A36
+0A2E:  BCF    FD8.0
+0A30:  RLCF   00,F
+0A32:  DECFSZ 01,F
+0A34:  BRA    0A2E
+0A36:  MOVF   00,W
+0A38:  XORLW  FF
+0A3A:  ANDWF  0F,F
+....................  
+....................    output_low(GLCD_DI);          // Set for instruction 
+0A3C:  BCF    F93.4
+0A3E:  BCF    F8A.4
+....................    glcd_writeByte(side, x);      // Set the horizontal address 
+0A40:  MOVLW  00
+0A42:  BTFSC  10.0
+0A44:  MOVLW  01
+0A46:  MOVWF  15
+0A48:  MOVFF  0C,16
+0A4C:  RCALL  0820
+....................    output_high(GLCD_DI);         // Set for data 
+0A4E:  BCF    F93.4
+0A50:  BSF    F8A.4
+....................    glcd_writeByte(side, data);   // Write the pixel data 
+0A52:  MOVLW  00
+0A54:  BTFSC  10.0
+0A56:  MOVLW  01
+0A58:  MOVWF  15
+0A5A:  MOVFF  0F,16
+0A5E:  RCALL  0820
+.................... } 
+0A60:  RETLW  00
+.................... #endif 
+....................  
+....................  
+.................... // Purpose:    Fill the LCD screen with the passed in color 
+.................... // Inputs:     ON  - turn all the pixels on 
+.................... //             OFF - turn all the pixels off 
+.................... void glcd_fillScreen(int1 color) 
+.................... #ifdef FAST_GLCD 
+.................... { 
+....................    int8  data; 
+....................    int8  *p1, *p2; 
+....................    int16 i; 
+....................  
+....................    p1 = displayData.left; 
+....................    p2 = displayData.right; 
+....................    data = 0xFF * color; 
+....................  
+....................    for(i=0; i<512; ++i) 
+....................    { 
+....................       *p1++ = data; 
+....................       *p2++ = data; 
+....................    } 
+.................... } 
+.................... #else 
+.................... { 
+....................    int8 i, j; 
+....................  
+....................    // Loop through the vertical pages 
+....................    for(i = 0; i < 8; ++i) 
+*
+0852:  CLRF   08
+0854:  MOVF   08,W
+0856:  SUBLW  07
+0858:  BNC   08C2
+....................    { 
+....................       output_low(GLCD_DI);                      // Set for instruction 
+085A:  BCF    F93.4
+085C:  BCF    F8A.4
+....................       glcd_writeByte(GLCD_LEFT, 0b01000000);    // Set horizontal address to 0 
+085E:  CLRF   15
+0860:  MOVLW  40
+0862:  MOVWF  16
+0864:  RCALL  0820
+....................       glcd_writeByte(GLCD_RIGHT, 0b01000000); 
+0866:  MOVLW  01
+0868:  MOVWF  15
+086A:  MOVLW  40
+086C:  MOVWF  16
+086E:  RCALL  0820
+....................       glcd_writeByte(GLCD_LEFT, i | 0b10111000);// Set page address 
+0870:  MOVF   08,W
+0872:  IORLW  B8
+0874:  MOVWF  0A
+0876:  CLRF   15
+0878:  MOVWF  16
+087A:  RCALL  0820
+....................       glcd_writeByte(GLCD_RIGHT, i | 0b10111000); 
+087C:  MOVF   08,W
+087E:  IORLW  B8
+0880:  MOVWF  0A
+0882:  MOVLW  01
+0884:  MOVWF  15
+0886:  MOVFF  0A,16
+088A:  RCALL  0820
+....................       output_high(GLCD_DI);                     // Set for data 
+088C:  BCF    F93.4
+088E:  BSF    F8A.4
+....................  
+....................       // Loop through the horizontal sections 
+....................       for(j = 0; j < 64; ++j) 
+0890:  CLRF   09
+0892:  MOVF   09,W
+0894:  SUBLW  3F
+0896:  BNC   08BE
+....................       { 
+....................          glcd_writeByte(GLCD_LEFT, 0xFF*color);  // Turn pixels on or off 
+0898:  MOVF   07,W
+089A:  MULLW  FF
+089C:  MOVFF  FF3,0A
+08A0:  CLRF   15
+08A2:  MOVFF  0A,16
+08A6:  RCALL  0820
+....................          glcd_writeByte(GLCD_RIGHT, 0xFF*color); // Turn pixels on or off 
+08A8:  MOVF   07,W
+08AA:  MULLW  FF
+08AC:  MOVFF  FF3,0A
+08B0:  MOVLW  01
+08B2:  MOVWF  15
+08B4:  MOVFF  0A,16
+08B8:  RCALL  0820
+....................       } 
+08BA:  INCF   09,F
+08BC:  BRA    0892
+....................    } 
+08BE:  INCF   08,F
+08C0:  BRA    0854
+.................... } 
+08C2:  RETLW  00
+.................... #endif 
+....................  
+....................  
+.................... // Purpose:    Write a byte of data to the specified chip 
+.................... // Inputs:     1) chipSelect - which chip to write the data to 
+.................... //             2) data - the byte of data to write 
+.................... void glcd_writeByte(int1 side, BYTE data) 
+.................... { 
+....................    if(side)                   // Choose which side to write to 
+*
+0820:  MOVF   15,F
+0822:  BZ    082A
+....................       output_high(GLCD_CS2); 
+0824:  BCF    F94.1
+0826:  BSF    F8B.1
+....................    else 
+0828:  BRA    082E
+....................       output_high(GLCD_CS1); 
+082A:  BCF    F94.0
+082C:  BSF    F8B.0
+....................  
+....................    output_low(GLCD_RW);       // Set for writing 
+082E:  BCF    F93.1
+0830:  BCF    F8A.1
+....................    output_d(data);            // Put the data on the port 
+0832:  CLRF   F95
+0834:  MOVFF  16,F8C
+....................    delay_cycles(1); 
+0838:  NOP   
+....................    output_high(GLCD_E);       // Pulse the enable pin 
+083A:  BCF    F93.2
+083C:  BSF    F8A.2
+....................    delay_cycles(5); 
+083E:  BRA    0840
+0840:  BRA    0842
+0842:  NOP   
+....................    output_low(GLCD_E); 
+0844:  BCF    F93.2
+0846:  BCF    F8A.2
+....................  
+....................    output_low(GLCD_CS1);      // Reset the chip select lines 
+0848:  BCF    F94.0
+084A:  BCF    F8B.0
+....................    output_low(GLCD_CS2); 
+084C:  BCF    F94.1
+084E:  BCF    F8B.1
+.................... } 
+0850:  RETLW  00
+....................  
+....................  
+.................... // Purpose:    Reads a byte of data from the specified chip 
+.................... // Ouputs:     A byte of data read from the chip 
+.................... BYTE glcd_readByte(int1 side) 
+.................... { 
+....................    BYTE data;                 // Stores the data read from the LCD 
+....................  
+....................    set_tris_d(0xFF);          // Set port d to input 
+*
+095E:  MOVLW  FF
+0960:  MOVWF  F95
+....................    output_high(GLCD_RW);      // Set for reading 
+0962:  BCF    F93.1
+0964:  BSF    F8A.1
+....................  
+....................    if(side)                   // Choose which side to write to 
+0966:  MOVF   12,F
+0968:  BZ    0970
+....................       output_high(GLCD_CS2); 
+096A:  BCF    F94.1
+096C:  BSF    F8B.1
+....................    else 
+096E:  BRA    0974
+....................       output_high(GLCD_CS1); 
+0970:  BCF    F94.0
+0972:  BSF    F8B.0
+....................  
+....................    delay_cycles(1); 
+0974:  NOP   
+....................    output_high(GLCD_E);       // Pulse the enable pin 
+0976:  BCF    F93.2
+0978:  BSF    F8A.2
+....................    delay_cycles(4); 
+097A:  BRA    097C
+097C:  BRA    097E
+....................    data = input_d();          // Get the data from the display's output register 
+097E:  MOVLW  FF
+0980:  MOVWF  F95
+0982:  MOVFF  F83,13
+....................    output_low(GLCD_E); 
+0986:  BCF    F93.2
+0988:  BCF    F8A.2
+....................  
+....................    output_low(GLCD_CS1);      // Reset the chip select lines 
+098A:  BCF    F94.0
+098C:  BCF    F8B.0
+....................    output_low(GLCD_CS2); 
+098E:  BCF    F94.1
+0990:  BCF    F8B.1
+....................    return data;               // Return the read data 
+0992:  MOVFF  13,01
+.................... } 
+0996:  RETLW  00
+....................  
+.................... #endif 
+....................  
+.................... #include <LIB_GRAPHICS.C> 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... ////                          graphics.c                             //// 
+.................... ////                                                                 //// 
+.................... ////   This file contains functions to draw lines, rectangles, bars, //// 
+.................... ////   circles and text to a display. A function which draws a       //// 
+.................... ////   single pixel must be defined before calling the functions in  //// 
+.................... ////   this file. Call it glcd_pixel(x, y, color) where x is the     //// 
+.................... ////   horizontal coordinate, y is the vertical coordinate, and      //// 
+.................... ////   color is 1 bit to turn the pixel on or off.                   //// 
+.................... ////                                                                 //// 
+.................... ////   * Note: (0, 0) is treated as the upper left corner            //// 
+.................... ////                                                                 //// 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... ////                                                                 //// 
+.................... ////  glcd_line(x1, y1, x2, y2, color)                               //// 
+.................... ////     * Draws a line from the first point to the second point     //// 
+.................... ////       with the given color                                      //// 
+.................... ////       - color can be ON or OFF                                  //// 
+.................... ////                                                                 //// 
+.................... ////  glcd_rect(x1, y1, x2, y2, fill, color)                         //// 
+.................... ////     * Draws a rectangle with one corner at point (x1,y1) and    //// 
+.................... ////       the other corner at point (x2,y2)                         //// 
+.................... ////       - fill can be YES or NO                                   //// 
+.................... ////       - color can be ON or OFF                                  //// 
+.................... ////                                                                 //// 
+.................... ////  glcd_bar(x1, y1, x2, y2, width, color)                         //// 
+.................... ////     * Draws a bar (wide line) from the first point to the       //// 
+.................... ////       second point                                              //// 
+.................... ////       - width is the number of pixels wide                      //// 
+.................... ////       - color is ON or OFF                                      //// 
+.................... ////                                                                 //// 
+.................... ////  glcd_circle(x, y, radius, fill, color)                         //// 
+.................... ////     * Draws a circle with center at (x,y)                       //// 
+.................... ////       - fill can be YES or NO                                   //// 
+.................... ////       - color can be ON or OFF                                  //// 
+.................... ////                                                                 //// 
+.................... ////  glcd_text57(x, y, textptr, size, color)                        //// 
+.................... ////     * Write the null terminated text pointed to by textptr with //// 
+.................... ////       the upper left coordinate of the first character at (x,y) //// 
+.................... ////       Characters are 5 pixels wide and 7 pixels tall            //// 
+.................... ////       - size is an integer that scales the size of the text     //// 
+.................... ////       - color is ON or OFF                                      //// 
+.................... ////     * Note - This function wraps characters to the next line    //// 
+.................... ////              use #define GLCD_WIDTH to specify a display width  //// 
+.................... ////                                                                 //// 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... ////        (C) Copyright 1996, 2004 Custom Computer Services        //// 
+.................... //// This source code may only be used by licensed users of the CCS  //// 
+.................... //// C compiler.  This source code may only be distributed to other  //// 
+.................... //// licensed users of the CCS C compiler.  No other use,            //// 
+.................... //// reproduction or distribution is permitted without written       //// 
+.................... //// permission.  Derivative programs created using this software    //// 
+.................... //// in object code form are not restricted in any way.              //// 
+.................... ///////////////////////////////////////////////////////////////////////// 
+....................  
+....................  
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... #ifndef GRAPHICS_DRAWING_FUNCTIONS 
+.................... #define GRAPHICS_DRAWING_FUNCTIONS 
+.................... ///////////////////////////////////////////////////////////////////////// 
+....................  
+....................  
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... #ifndef ON 
+.................... #define ON  1 
+.................... #endif 
+....................  
+.................... #ifndef OFF 
+.................... #define OFF 0 
+.................... #endif 
+....................  
+.................... #ifndef YES 
+.................... #define YES 1 
+.................... #endif 
+....................  
+.................... #ifndef NO 
+.................... #define NO  0 
+.................... #endif 
+.................... ///////////////////////////////////////////////////////////////////////// 
+....................  
+....................  
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... //// Defines a 5x7 font 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... const int8 FONT[51][5] ={0x00, 0x00, 0x00, 0x00, 0x00, // SPACE 
+....................                          0x00, 0x00, 0x5F, 0x00, 0x00, // ! 
+....................                          0x00, 0x03, 0x00, 0x03, 0x00, // " 
+....................                          0x14, 0x3E, 0x14, 0x3E, 0x14, // # 
+....................                          0x24, 0x2A, 0x7F, 0x2A, 0x12, // $ 
+....................                          0x43, 0x33, 0x08, 0x66, 0x61, // % 
+....................                          0x36, 0x49, 0x55, 0x22, 0x50, // & 
+....................                          0x00, 0x05, 0x03, 0x00, 0x00, // ' 
+....................                          0x00, 0x1C, 0x22, 0x41, 0x00, // ( 
+....................                          0x00, 0x41, 0x22, 0x1C, 0x00, // ) 
+....................                          0x14, 0x08, 0x3E, 0x08, 0x14, // * 
+....................                          0x08, 0x08, 0x3E, 0x08, 0x08, // + 
+....................                          0x00, 0x50, 0x30, 0x00, 0x00, // , 
+....................                          0x08, 0x08, 0x08, 0x08, 0x08, // - 
+....................                          0x00, 0x60, 0x60, 0x00, 0x00, // . 
+....................                          0x20, 0x10, 0x08, 0x04, 0x02, // / 
+....................                          0x3E, 0x51, 0x49, 0x45, 0x3E, // 0 
+....................                          0x00, 0x04, 0x02, 0x7F, 0x00, // 1 
+....................                          0x42, 0x61, 0x51, 0x49, 0x46, // 2 
+....................                          0x22, 0x41, 0x49, 0x49, 0x36, // 3 
+....................                          0x18, 0x14, 0x12, 0x7F, 0x10, // 4 
+....................                          0x27, 0x45, 0x45, 0x45, 0x39, // 5 
+....................                          0x3E, 0x49, 0x49, 0x49, 0x32, // 6 
+....................                          0x01, 0x01, 0x71, 0x09, 0x07, // 7 
+....................                          0x36, 0x49, 0x49, 0x49, 0x36, // 8 
+....................                          0x26, 0x49, 0x49, 0x49, 0x3E, // 9 
+....................                          0x00, 0x36, 0x36, 0x00, 0x00, // : 
+....................                          0x00, 0x56, 0x36, 0x00, 0x00, // ; 
+....................                          0x08, 0x14, 0x22, 0x41, 0x00, // < 
+....................                          0x14, 0x14, 0x14, 0x14, 0x14, // = 
+....................                          0x00, 0x41, 0x22, 0x14, 0x08, // > 
+....................                          0x02, 0x01, 0x51, 0x09, 0x06, // ? 
+....................                          0x3E, 0x41, 0x59, 0x55, 0x5E, // @ 
+....................                          0x7E, 0x09, 0x09, 0x09, 0x7E, // A 
+....................                          0x7F, 0x49, 0x49, 0x49, 0x36, // B 
+....................                          0x3E, 0x41, 0x41, 0x41, 0x22, // C 
+....................                          0x7F, 0x41, 0x41, 0x41, 0x3E, // D 
+....................                          0x7F, 0x49, 0x49, 0x49, 0x41, // E 
+....................                          0x7F, 0x09, 0x09, 0x09, 0x01, // F 
+....................                          0x3E, 0x41, 0x41, 0x49, 0x3A, // G 
+....................                          0x7F, 0x08, 0x08, 0x08, 0x7F, // H 
+....................                          0x00, 0x41, 0x7F, 0x41, 0x00, // I 
+....................                          0x30, 0x40, 0x40, 0x40, 0x3F, // J 
+....................                          0x7F, 0x08, 0x14, 0x22, 0x41, // K 
+....................                          0x7F, 0x40, 0x40, 0x40, 0x40, // L 
+....................                          0x7F, 0x02, 0x0C, 0x02, 0x7F, // M 
+....................                          0x7F, 0x02, 0x04, 0x08, 0x7F, // N 
+....................                          0x3E, 0x41, 0x41, 0x41, 0x3E, // O 
+....................                          0x7F, 0x09, 0x09, 0x09, 0x06, // P 
+....................                          0x1E, 0x21, 0x21, 0x21, 0x5E, // Q 
+....................                          0x7F, 0x09, 0x09, 0x09, 0x76};// R 
+....................  
+.................... const int8 FONT2[44][5]={0x26, 0x49, 0x49, 0x49, 0x32, // S 
+....................                          0x01, 0x01, 0x7F, 0x01, 0x01, // T 
+....................                          0x3F, 0x40, 0x40, 0x40, 0x3F, // U 
+....................                          0x1F, 0x20, 0x40, 0x20, 0x1F, // V 
+....................                          0x7F, 0x20, 0x10, 0x20, 0x7F, // W 
+....................                          0x41, 0x22, 0x1C, 0x22, 0x41, // X 
+....................                          0x07, 0x08, 0x70, 0x08, 0x07, // Y 
+....................                          0x61, 0x51, 0x49, 0x45, 0x43, // Z 
+....................                          0x00, 0x7F, 0x41, 0x00, 0x00, // [ 
+....................                          0x02, 0x04, 0x08, 0x10, 0x20, // \ 
+....................                          0x00, 0x00, 0x41, 0x7F, 0x00, // ] 
+....................                          0x04, 0x02, 0x01, 0x02, 0x04, // ^ 
+....................                          0x40, 0x40, 0x40, 0x40, 0x40, // _ 
+....................                          0x00, 0x01, 0x02, 0x04, 0x00, // ` 
+....................                          0x20, 0x54, 0x54, 0x54, 0x78, // a 
+....................                          0x7F, 0x44, 0x44, 0x44, 0x38, // b 
+....................                          0x38, 0x44, 0x44, 0x44, 0x44, // c 
+....................                          0x38, 0x44, 0x44, 0x44, 0x7F, // d 
+....................                          0x38, 0x54, 0x54, 0x54, 0x18, // e 
+....................                          0x04, 0x04, 0x7E, 0x05, 0x05, // f 
+....................                          0x08, 0x54, 0x54, 0x54, 0x3C, // g 
+....................                          0x7F, 0x08, 0x04, 0x04, 0x78, // h 
+....................                          0x00, 0x44, 0x7D, 0x40, 0x00, // i 
+....................                          0x20, 0x40, 0x44, 0x3D, 0x00, // j 
+....................                          0x7F, 0x10, 0x28, 0x44, 0x00, // k 
+....................                          0x00, 0x41, 0x7F, 0x40, 0x00, // l 
+....................                          0x7C, 0x04, 0x78, 0x04, 0x78, // m 
+....................                          0x7C, 0x08, 0x04, 0x04, 0x78, // n 
+....................                          0x38, 0x44, 0x44, 0x44, 0x38, // o 
+....................                          0x7C, 0x14, 0x14, 0x14, 0x08, // p 
+....................                          0x08, 0x14, 0x14, 0x14, 0x7C, // q 
+....................                          0x00, 0x7C, 0x08, 0x04, 0x04, // r 
+....................                          0x48, 0x54, 0x54, 0x54, 0x20, // s 
+....................                          0x04, 0x04, 0x3F, 0x44, 0x44, // t 
+....................                          0x3C, 0x40, 0x40, 0x20, 0x7C, // u 
+....................                          0x1C, 0x20, 0x40, 0x20, 0x1C, // v 
+....................                          0x3C, 0x40, 0x30, 0x40, 0x3C, // w 
+....................                          0x44, 0x28, 0x10, 0x28, 0x44, // x 
+....................                          0x0C, 0x50, 0x50, 0x50, 0x3C, // y 
+....................                          0x44, 0x64, 0x54, 0x4C, 0x44, // z 
+....................                          0x00, 0x08, 0x36, 0x41, 0x41, // { 
+....................                          0x00, 0x00, 0x7F, 0x00, 0x00, // | 
+....................                          0x41, 0x41, 0x36, 0x08, 0x00, // } 
+....................                          0x02, 0x01, 0x02, 0x04, 0x02};// ~ 
+.................... ///////////////////////////////////////////////////////////////////////// 
+....................  
+....................  
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... // Purpose:       Draw a line on a graphic LCD using Bresenham's 
+.................... //                line drawing algorithm 
+.................... // Inputs:        (x1, y1) - the start coordinate 
+.................... //                (x2, y2) - the end coordinate 
+.................... //                color - ON or OFF 
+.................... // Dependencies:  glcd_pixel() 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... #ifdef LARGE_LCD 
+.................... void glcd_line(int16 x1, int16 y1, int16 x2, int16 y2, int1 color) 
+.................... #else 
+.................... void glcd_line(int8 x1, int8 y1, int8 x2, int8 y2, int1 color) 
+.................... #endif 
+.................... { 
+....................    int16        dy, dx; 
+....................    signed int8  addx=1, addy=1; 
+....................    signed int16 P, diff; 
+....................  
+....................    #ifdef LARGE_LCD 
+....................    int16 i=0; 
+....................    dx = abs((signed int16)(x2 - x1)); 
+....................    dy = abs((signed int16)(y2 - y1)); 
+....................    #else 
+....................    int8 i=0; 
+....................    dx = abs((signed int8)(x2 - x1)); 
+....................    dy = abs((signed int8)(y2 - y1)); 
+....................    #endif 
+....................  
+....................    if(x1 > x2) 
+....................       addx = -1; 
+....................    if(y1 > y2) 
+....................       addy = -1; 
+....................  
+....................    if(dx >= dy) 
+....................    { 
+....................       dy *= 2; 
+....................       P = dy - dx; 
+....................       diff = P - dx; 
+....................  
+....................       for(; i<=dx; ++i) 
+....................       { 
+....................          glcd_pixel(x1, y1, color); 
+....................  
+....................          if(P < 0) 
+....................          { 
+....................             P  += dy; 
+....................             x1 += addx; 
+....................          } 
+....................          else 
+....................          { 
+....................             P  += diff; 
+....................             x1 += addx; 
+....................             y1 += addy; 
+....................          } 
+....................       } 
+....................    } 
+....................    else 
+....................    { 
+....................       dx *= 2; 
+....................       P = dx - dy; 
+....................       diff = P - dy; 
+....................  
+....................       for(; i<=dy; ++i) 
+....................       { 
+....................          glcd_pixel(x1, y1, color); 
+....................  
+....................          if(P < 0) 
+....................          { 
+....................             P  += dx; 
+....................             y1 += addy; 
+....................          } 
+....................          else 
+....................          { 
+....................             P  += diff; 
+....................             x1 += addx; 
+....................             y1 += addy; 
+....................          } 
+....................       } 
+....................    } 
+.................... } 
+....................  
+....................  
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... // Purpose:       Draw a rectangle on a graphic LCD 
+.................... // Inputs:        (x1, y1) - the start coordinate 
+.................... //                (x2, y2) - the end coordinate 
+.................... //                fill  - YES or NO 
+.................... //                color - ON or OFF 
+.................... // Dependencies:  glcd_pixel(), glcd_line() 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... #ifdef LARGE_LCD 
+.................... void glcd_rect(int16 x1, int16 y1, int16 x2, int16 y2, int1 fill, int1 color) 
+.................... #else 
+.................... void glcd_rect(int8 x1, int8 y1, int8 x2, int8 y2, int1 fill, int1 color) 
+.................... #endif 
+.................... { 
+....................    if(fill) 
+....................    { 
+....................       #ifdef LARGE_LCD 
+....................       int16 i, xmin, xmax, ymin, ymax; 
+....................       #else 
+....................       int8  i, xmin, xmax, ymin, ymax; 
+....................       #endif 
+....................  
+....................       if(x1 < x2)                            //  Find x min and max 
+....................       { 
+....................          xmin = x1; 
+....................          xmax = x2; 
+....................       } 
+....................       else 
+....................       { 
+....................          xmin = x2; 
+....................          xmax = x1; 
+....................       } 
+....................  
+....................       if(y1 < y2)                            // Find the y min and max 
+....................       { 
+....................          ymin = y1; 
+....................          ymax = y2; 
+....................       } 
+....................       else 
+....................       { 
+....................          ymin = y2; 
+....................          ymax = y1; 
+....................       } 
+....................  
+....................       for(; xmin <= xmax; ++xmin) 
+....................       { 
+....................          for(i=ymin; i<=ymax; ++i) 
+....................          { 
+....................             glcd_pixel(xmin, i, color); 
+....................          } 
+....................       } 
+....................    } 
+....................    else 
+....................    { 
+....................       glcd_line(x1, y1, x2, y1, color);      // Draw the 4 sides 
+....................       glcd_line(x1, y2, x2, y2, color); 
+....................       glcd_line(x1, y1, x1, y2, color); 
+....................       glcd_line(x2, y1, x2, y2, color); 
+....................    } 
+.................... } 
+....................  
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... // Purpose:       Draw a bar (wide line) on a graphic LCD 
+.................... // Inputs:        (x1, y1) - the start coordinate 
+.................... //                (x2, y2) - the end coordinate 
+.................... //                width  - The number of pixels wide 
+.................... //                color - ON or OFF 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... #ifdef LARGE_LCD 
+.................... void glcd_bar(int16 x1, int16 y1, int16 x2, int16 y2, int8 width, int1 color) 
+.................... #else 
+.................... void glcd_bar(int8 x1, int8 y1, int8 x2, int8 y2, int8 width, int1 color) 
+.................... #endif 
+.................... { 
+....................    int8         half_width; 
+....................    signed int16 dy, dx; 
+....................    signed int8  addx=1, addy=1, j; 
+....................    signed int16 P, diff, c1, c2; 
+....................  
+....................    #ifdef LARGE_LCD 
+....................    int16 i=0; 
+....................    dx = abs((signed int16)(x2 - x1)); 
+....................    dy = abs((signed int16)(y2 - y1)); 
+....................    #else 
+....................    int8 i=0; 
+....................    dx = abs((signed int8)(x2 - x1)); 
+....................    dy = abs((signed int8)(y2 - y1)); 
+....................    #endif 
+....................  
+....................    half_width = width/2; 
+....................    c1 = -(dx*x1 + dy*y1); 
+....................    c2 = -(dx*x2 + dy*y2); 
+....................  
+....................    if(x1 > x2) 
+....................    { 
+....................       signed int16 temp; 
+....................       temp = c1; 
+....................       c1 = c2; 
+....................       c2 = temp; 
+....................       addx = -1; 
+....................    } 
+....................    if(y1 > y2) 
+....................    { 
+....................       signed int16 temp; 
+....................       temp = c1; 
+....................       c1 = c2; 
+....................       c2 = temp; 
+....................       addy = -1; 
+....................    } 
+....................  
+....................    if(dx >= dy) 
+....................    { 
+....................       P = 2*dy - dx; 
+....................       diff = P - dx; 
+....................  
+....................       for(i=0; i<=dx; ++i) 
+....................       { 
+....................          for(j=-half_width; j<half_width+width%2; ++j) 
+....................          { 
+....................             #ifdef LARGE_LCD 
+....................             int16 temp; 
+....................             #else 
+....................             int8 temp; 
+....................             #endif 
+....................  
+....................             temp = dx*x1+dy*(y1+j);    // Use more RAM to increase speed 
+....................             if(temp+c1 >= 0 && temp+c2 <=0) 
+....................                glcd_pixel(x1, y1+j, color); 
+....................          } 
+....................          if(P < 0) 
+....................          { 
+....................             P  += 2*dy; 
+....................             x1 += addx; 
+....................          } 
+....................          else 
+....................          { 
+....................             P  += diff; 
+....................             x1 += addx; 
+....................             y1 += addy; 
+....................          } 
+....................       } 
+....................    } 
+....................    else 
+....................    { 
+....................       P = 2*dx - dy; 
+....................       diff = P - dy; 
+....................  
+....................       for(i=0; i<=dy; ++i) 
+....................       { 
+....................          if(P < 0) 
+....................          { 
+....................             P  += 2*dx; 
+....................             y1 += addy; 
+....................          } 
+....................          else 
+....................          { 
+....................             P  += diff; 
+....................             x1 += addx; 
+....................             y1 += addy; 
+....................          } 
+....................          for(j=-half_width; j<half_width+width%2; ++j) 
+....................          { 
+....................             #ifdef LARGE_LCD 
+....................             int16 temp; 
+....................             #else 
+....................             int8 temp; 
+....................             #endif 
+....................  
+....................             temp = dx*x1+dy*(y1+j);    // Use more RAM to increase speed 
+....................             if(temp+c1 >= 0 && temp+c2 <=0) 
+....................                glcd_pixel(x1+j, y1, color); 
+....................          } 
+....................       } 
+....................    } 
+.................... } 
+....................  
+....................  
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... // Purpose:       Draw a circle on a graphic LCD 
+.................... // Inputs:        (x,y) - the center of the circle 
+.................... //                radius - the radius of the circle 
+.................... //                fill - YES or NO 
+.................... //                color - ON or OFF 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... #ifdef LARGE_LCD 
+.................... void glcd_circle(int16 x, int16 y, int16 radius, int1 fill, int1 color) 
+.................... #else 
+.................... void glcd_circle(int8 x, int8 y, int8 radius, int1 fill, int1 color) 
+.................... #endif 
+.................... { 
+....................    #ifdef LARGE_LCD 
+....................    signed int16 a, b, P; 
+....................    #else 
+....................    signed int8  a, b, P; 
+....................    #endif 
+....................  
+....................    a = 0; 
+....................    b = radius; 
+....................    P = 1 - radius; 
+....................  
+....................    do 
+....................    { 
+....................       if(fill) 
+....................       { 
+....................          glcd_line(x-a, y+b, x+a, y+b, color); 
+....................          glcd_line(x-a, y-b, x+a, y-b, color); 
+....................          glcd_line(x-b, y+a, x+b, y+a, color); 
+....................          glcd_line(x-b, y-a, x+b, y-a, color); 
+....................       } 
+....................       else 
+....................       { 
+....................          glcd_pixel(a+x, b+y, color); 
+....................          glcd_pixel(b+x, a+y, color); 
+....................          glcd_pixel(x-a, b+y, color); 
+....................          glcd_pixel(x-b, a+y, color); 
+....................          glcd_pixel(b+x, y-a, color); 
+....................          glcd_pixel(a+x, y-b, color); 
+....................          glcd_pixel(x-a, y-b, color); 
+....................          glcd_pixel(x-b, y-a, color); 
+....................       } 
+....................  
+....................       if(P < 0) 
+....................          P += 3 + 2 * a++; 
+....................       else 
+....................          P += 5 + 2 * (a++ - b--); 
+....................     } while(a <= b); 
+.................... } 
+....................  
+....................  
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... // Purpose:       Write text on a graphic LCD 
+.................... // Inputs:        (x,y) - The upper left coordinate of the first letter 
+.................... //                textptr - A pointer to an array of text to display 
+.................... //                size - The size of the text: 1 = 5x7, 2 = 10x14, ... 
+.................... //                color - ON or OFF 
+.................... ///////////////////////////////////////////////////////////////////////// 
+.................... #ifdef LARGE_LCD 
+.................... void glcd_text57(int16 x, int16 y, char* textptr, int8 size, int1 color) 
+.................... #else 
+.................... void glcd_text57(int8 x, int8 y, char* textptr, int8 size, int1 color) 
+.................... #endif 
+.................... { 
+....................    int8 j, k, l, m;                       // Loop counters 
+....................    int8 pixelData[5];                     // Stores character data 
+....................  
+....................    for(; *textptr != '\0'; ++textptr, ++x)// Loop through the passed string 
+....................    { 
+....................       if(*textptr < 'S') // Checks if the letter is in the first font array 
+....................          memcpy(pixelData, FONT[*textptr - ' '], 5); 
+....................       else if(*textptr <= '~') // Check if the letter is in the second font array 
+....................          memcpy(pixelData, FONT2[*textptr - 'S'], 5); 
+....................       else 
+....................          memcpy(pixelData, FONT[0], 5);   // Default to space 
+....................  
+....................       // Handles newline and carriage returns 
+....................       switch(*textptr) 
+....................       { 
+....................          case '\n': 
+....................             y += 7*size + 1; 
+....................             continue; 
+....................          case '\r': 
+....................             x = 0; 
+....................             continue; 
+....................       } 
+....................  
+....................       if(x+5*size >= GLCD_WIDTH)          // Performs character wrapping 
+....................       { 
+....................          x = 0;                           // Set x at far left position 
+....................          y += 7*size + 1;                 // Set y at next position down 
+....................       } 
+....................       for(j=0; j<5; ++j, x+=size)         // Loop through character byte data 
+....................       { 
+....................          for(k=0; k < 7; ++k)             // Loop through the vertical pixels 
+....................          { 
+....................             if(bit_test(pixelData[j], k)) // Check if the pixel should be set 
+....................             { 
+....................                for(l=0; l < size; ++l)    // These two loops change the 
+....................                {                          // character's size 
+....................                   for(m=0; m < size; ++m) 
+....................                   { 
+....................                      glcd_pixel(x+m, y+k*size+l, color); // Draws the pixel 
+....................                   } 
+....................                } 
+....................             } 
+....................          } 
+....................       } 
+....................    } 
+.................... } 
+....................  
+.................... #endif 
+....................  
+.................... #include <LIB_BMP_LCD.C> 
+.................... //----------------------------------------------------------------------------// 
+.................... // BMP_LCD.C                                                                // 
+.................... // Ezequiel Donhauser                                                         // 
+.................... //                                                                            // 
+.................... // esse arquivo contem as configuraçoes para escrita no display 128x64        // 
+.................... // funçoes: glcd_imagem();                                                    // 
+.................... // Configuraçoes: imagem[64][16] = 128x64                                     // 
+.................... //                                                                            // 
+.................... //----------------------------------------------------------------------------// 
+....................  
+.................... //declaração de funçoes 
+.................... void glcd_imagem(int8 imagem); 
+....................  
+.................... //imagem 1 
+.................... const int8 imagem_1[64][16] = { 
+....................  
+.................... 0b00000000, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x03, 0xFF, 0xFF, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x07, 0xFF, 0xFF, 0xFC, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x1F, 0xFF, 0xFF, 0xFC, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x3F, 0xFF, 0xFF, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x7F, 0xFF, 0xFF, 0xFD, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0xFF, 0xCF, 0xFF, 0x8F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0xED, 0x87, 0xFF, 0x07, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x01, 0xFF, 0x03, 0xFF, 0x03, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x03, 0xFE, 0x01, 0xFC, 0x03, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x03, 0xFE, 0x01, 0xFC, 0x01, 0xE0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x07, 0xFC, 0x00, 0xFC, 0x01, 0xE0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x07, 0xF8, 0x00, 0x78, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x07, 0xF8, 0x00, 0x70, 0x00, 0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x0F, 0xFC, 0x00, 0x38, 0x00, 0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x0F, 0xFE, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x0F, 0xEE, 0x00, 0x1C, 0x00, 0x1E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x0F, 0xCF, 0x00, 0x0E, 0x00, 0x1E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x0F, 0x87, 0x00, 0x0F, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x0F, 0x03, 0x80, 0x07, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x0E, 0x01, 0xC0, 0x03, 0x80, 0x07, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x0E, 0x01, 0xC0, 0x03, 0xC0, 0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x0C, 0x00, 0xE0, 0x01, 0xC0, 0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x08, 0x00, 0xF0, 0x00, 0xE0, 0x01, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x08, 0x00, 0xF0, 0x00, 0xF0, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x00, 0x70, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x00, 0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x01, 0xFC, 0x00, 0xFC, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x03, 0xFE, 0x01, 0xFC, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x07, 0xFE, 0x01, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x07, 0xFF, 0x03, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0x87, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x1F, 0xFF, 0x87, 0xFF, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x1F, 0xFF, 0xFF, 0xFF, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x3F, 0xFF, 0xFF, 0xFF, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x1F, 0xFF, 0xFF, 0xFF, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x07, 0xFF, 0xFF, 0xFF, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x03, 0xFF, 0xFF, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0xFF, 0xE0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x06, 0x01, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x0F, 0x03, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x0F, 0x83, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x0F, 0x87, 0xE7, 0x3F, 0xF7, 0xFE, 0x3F, 0xE3, 0xFF, 0x70, 0x67, 0x7F, 0xE0, 0x00, 0x00, 0x00, 
+.................... 0x0F, 0xC7, 0xE7, 0x3F, 0xF7, 0xFF, 0x7F, 0xF3, 0xFF, 0x70, 0x77, 0x7F, 0xF0, 0x00, 0x00, 0x00, 
+.................... 0x0D, 0xCE, 0xE7, 0x30, 0x07, 0x07, 0x70, 0x77, 0x00, 0x70, 0x77, 0x70, 0x70, 0x00, 0x00, 0x00, 
+.................... 0x1C, 0xFE, 0xE7, 0x30, 0x07, 0x07, 0x70, 0x77, 0x00, 0x7F, 0xF7, 0x70, 0x70, 0x00, 0x00, 0x00, 
+.................... 0x1C, 0xFC, 0xE7, 0x30, 0x07, 0xFE, 0x70, 0x77, 0x00, 0x7F, 0xF7, 0x7F, 0xF0, 0x00, 0x00, 0x00, 
+.................... 0x1C, 0x7C, 0x67, 0x70, 0x07, 0xFE, 0x70, 0x77, 0x00, 0x70, 0x77, 0x7F, 0xE0, 0x00, 0x00, 0x00, 
+.................... 0x1C, 0x78, 0x77, 0x3F, 0xF7, 0x07, 0x7F, 0xF3, 0xFF, 0x70, 0x77, 0x70, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x1C, 0x00, 0x77, 0x1F, 0xF7, 0x07, 0x3F, 0xE3, 0xFF, 0x70, 0x77, 0x70, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  
+.................... }; 
+....................  
+.................... // imagem 2 
+.................... const int8 imagem_2[64][16] = { 
+....................  
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x80, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0xFF, 0xE0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x03, 0x00, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x06, 0x00, 0x1C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x0C, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x70, 0x00, 0x00, 0x01, 0xF0, 0x00, 0xF8, 0x00, 0x7D, 0xC3, 0x80, 0xEC, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x70, 0x00, 0x00, 0x04, 0x0C, 0x02, 0x06, 0x00, 0x87, 0x03, 0x81, 0x07, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x60, 0x00, 0x00, 0x08, 0x06, 0x04, 0x03, 0x01, 0x03, 0x03, 0x82, 0x03, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x60, 0x00, 0x00, 0x10, 0x07, 0x08, 0x03, 0x81, 0x01, 0x83, 0x86, 0x03, 0x80, 0x00, 0x00, 
+.................... 0x00, 0x60, 0x00, 0x00, 0x10, 0x03, 0x88, 0x01, 0xC3, 0x01, 0x83, 0x86, 0x0C, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x70, 0x00, 0x00, 0x30, 0x03, 0x98, 0x01, 0xC7, 0x01, 0x83, 0x84, 0x70, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x70, 0x00, 0x00, 0x30, 0x03, 0x98, 0x01, 0xC7, 0x01, 0x83, 0x8E, 0x80, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x70, 0x00, 0x00, 0x30, 0x03, 0x98, 0x01, 0xC3, 0x01, 0x83, 0x8F, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x78, 0x00, 0xFE, 0x38, 0x03, 0x9C, 0x01, 0xC3, 0x81, 0x03, 0x86, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x38, 0x00, 0x0E, 0x38, 0x03, 0x9C, 0x01, 0xC1, 0xC3, 0x03, 0x87, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x3C, 0x00, 0x0E, 0x38, 0x03, 0x1C, 0x01, 0x80, 0xE4, 0x03, 0x87, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x1E, 0x00, 0x0E, 0x1C, 0x03, 0x0E, 0x01, 0x80, 0x1C, 0x03, 0x87, 0x80, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x0F, 0x00, 0x0E, 0x0C, 0x06, 0x06, 0x03, 0x00, 0x0C, 0x03, 0x83, 0xC0, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x07, 0x80, 0x0E, 0x07, 0x0C, 0x03, 0x86, 0x00, 0x0E, 0x07, 0xC1, 0xFF, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x01, 0xE0, 0x3C, 0x01, 0xF0, 0x00, 0xF8, 0x00, 0x0F, 0x80, 0x00, 0x7E, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x7F, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x01, 0xA3, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x01, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0xE0, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0E, 0x00, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x01, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+.................... 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
+.................... }; 
+....................  
+.................... //função que joga cada bit do vetor no display (escreve em todo display) 
+.................... void glcd_imagem(int8 imagem){ //(1,2,3...) 
+....................     
+....................    char i,j; 
+....................    signed char k; 
+....................     
+....................    if(imagem==1){ 
+*
+0A62:  DECFSZ 06,W
+0A64:  BRA    0AFA
+....................       for( i = 0 ; i < 64 ; i ++ ){  
+0A66:  CLRF   07
+0A68:  MOVF   07,W
+0A6A:  SUBLW  3F
+0A6C:  BNC   0AFA
+....................          for( j = 0 ; j < 16 ; j ++){    
+0A6E:  CLRF   08
+0A70:  MOVF   08,W
+0A72:  SUBLW  0F
+0A74:  BNC   0AF6
+....................          for(k=7;k>-1;k--){      
+0A76:  MOVLW  07
+0A78:  MOVWF  09
+0A7A:  MOVF   09,W
+0A7C:  XORLW  80
+0A7E:  SUBLW  7F
+0A80:  BC    0AF2
+....................          if( bit_test(imagem_1[i][j] ,7-k )) 
+0A82:  CLRF   0B
+0A84:  MOVFF  07,0A
+0A88:  CLRF   0D
+0A8A:  MOVLW  10
+0A8C:  MOVWF  0C
+0A8E:  RCALL  0940
+0A90:  MOVFF  02,0B
+0A94:  MOVFF  01,0A
+0A98:  MOVF   08,W
+0A9A:  ADDWF  01,W
+0A9C:  MOVWF  01
+0A9E:  MOVLW  00
+0AA0:  ADDWFC 02,W
+0AA2:  MOVWF  03
+0AA4:  MOVF   01,W
+0AA6:  MOVFF  FF2,0C
+0AAA:  BCF    FF2.7
+0AAC:  MOVFF  03,FF7
+0AB0:  CALL   0004
+0AB4:  BTFSC  0C.7
+0AB6:  BSF    FF2.7
+0AB8:  MOVWF  0D
+0ABA:  MOVLW  07
+0ABC:  BSF    FD8.0
+0ABE:  SUBFWB 09,W
+0AC0:  MOVWF  0E
+0AC2:  MOVFF  0D,00
+0AC6:  MOVF   0E,W
+0AC8:  MOVWF  01
+0ACA:  BZ    0AD4
+0ACC:  BCF    FD8.0
+0ACE:  RRCF   00,F
+0AD0:  DECFSZ 01,F
+0AD2:  BRA    0ACC
+0AD4:  BTFSS  00.0
+0AD6:  BRA    0AEE
+....................          glcd_pixel( j*8+k,i, ON );  
+0AD8:  MOVF   08,W
+0ADA:  MULLW  08
+0ADC:  MOVF   FF3,W
+0ADE:  ADDWF  09,W
+0AE0:  MOVWF  0B
+0AE2:  MOVWF  0C
+0AE4:  MOVFF  07,0D
+0AE8:  MOVLW  01
+0AEA:  MOVWF  0E
+0AEC:  RCALL  0998
+....................          }  
+0AEE:  DECF   09,F
+0AF0:  BRA    0A7A
+....................        } 
+0AF2:  INCF   08,F
+0AF4:  BRA    0A70
+....................       } 
+0AF6:  INCF   07,F
+0AF8:  BRA    0A68
+....................    } 
+....................     
+....................    if(imagem==2){ 
+0AFA:  MOVF   06,W
+0AFC:  SUBLW  02
+0AFE:  BNZ   0B92
+....................       for( i = 0 ; i < 64 ; i ++ ){  
+0B00:  CLRF   07
+0B02:  MOVF   07,W
+0B04:  SUBLW  3F
+0B06:  BNC   0B92
+....................          for( j = 0 ; j < 16 ; j ++){    
+0B08:  CLRF   08
+0B0A:  MOVF   08,W
+0B0C:  SUBLW  0F
+0B0E:  BNC   0B8E
+....................          for(k=7;k>-1;k--){      
+0B10:  MOVLW  07
+0B12:  MOVWF  09
+0B14:  MOVF   09,W
+0B16:  XORLW  80
+0B18:  SUBLW  7F
+0B1A:  BC    0B8A
+....................          if( bit_test(imagem_2[i][j] ,7-k )) 
+0B1C:  CLRF   0B
+0B1E:  MOVFF  07,0A
+0B22:  CLRF   0D
+0B24:  MOVLW  10
+0B26:  MOVWF  0C
+0B28:  RCALL  0940
+0B2A:  MOVFF  02,0B
+0B2E:  MOVFF  01,0A
+0B32:  MOVF   08,W
+0B34:  ADDWF  01,W
+0B36:  MOVWF  01
+0B38:  MOVLW  00
+0B3A:  ADDWFC 02,W
+0B3C:  MOVWF  03
+0B3E:  MOVF   01,W
+0B40:  MOVFF  FF2,0C
+0B44:  BCF    FF2.7
+0B46:  MOVFF  03,FF7
+0B4A:  RCALL  0412
+0B4C:  BTFSC  0C.7
+0B4E:  BSF    FF2.7
+0B50:  MOVWF  0D
+0B52:  MOVLW  07
+0B54:  BSF    FD8.0
+0B56:  SUBFWB 09,W
+0B58:  MOVWF  0E
+0B5A:  MOVFF  0D,00
+0B5E:  MOVF   0E,W
+0B60:  MOVWF  01
+0B62:  BZ    0B6C
+0B64:  BCF    FD8.0
+0B66:  RRCF   00,F
+0B68:  DECFSZ 01,F
+0B6A:  BRA    0B64
+0B6C:  BTFSS  00.0
+0B6E:  BRA    0B86
+....................          glcd_pixel( j*8+k,i, ON );  
+0B70:  MOVF   08,W
+0B72:  MULLW  08
+0B74:  MOVF   FF3,W
+0B76:  ADDWF  09,W
+0B78:  MOVWF  0B
+0B7A:  MOVWF  0C
+0B7C:  MOVFF  07,0D
+0B80:  MOVLW  01
+0B82:  MOVWF  0E
+0B84:  RCALL  0998
+....................          }  
+0B86:  DECF   09,F
+0B88:  BRA    0B14
+....................        } 
+0B8A:  INCF   08,F
+0B8C:  BRA    0B0A
+....................       } 
+0B8E:  INCF   07,F
+0B90:  BRA    0B02
+....................    } 
+.................... } 
+0B92:  RETLW  00
+....................  
+....................  
+.................... void main(){ 
+*
+0BBC:  CLRF   FF8
+0BBE:  BCF    FD0.7
+0BC0:  CLRF   FEA
+0BC2:  CLRF   FE9
+0BC4:  BSF    FC1.0
+0BC6:  BSF    FC1.1
+0BC8:  BSF    FC1.2
+0BCA:  BCF    FC1.3
+....................     
+....................    //CHAR letA[]="A"; 
+....................    //CHAR letB[]="B"; 
+....................    //CHAR letC[]="C"; 
+....................    //CHAR espera[]="teste"; 
+....................     
+....................    setup_adc_ports(NO_ANALOGS); 
+0BCC:  BSF    FC1.0
+0BCE:  BSF    FC1.1
+0BD0:  BSF    FC1.2
+0BD2:  BCF    FC1.3
+....................    setup_adc(ADC_OFF); 
+0BD4:  BCF    FC2.0
+....................    setup_psp(PSP_DISABLED); 
+0BD6:  BCF    F96.4
+....................    setup_spi(SPI_SS_DISABLED); 
+0BD8:  BCF    FC6.5
+0BDA:  BCF    F94.5
+0BDC:  BSF    F94.4
+0BDE:  BCF    F94.3
+0BE0:  MOVLW  01
+0BE2:  MOVWF  FC6
+0BE4:  MOVLW  00
+0BE6:  MOVWF  FC7
+....................    setup_wdt(WDT_OFF); 
+0BE8:  BCF    FD1.0
+....................    setup_timer_0(RTCC_INTERNAL); 
+0BEA:  MOVLW  80
+0BEC:  MOVWF  FD5
+....................    setup_timer_1(T1_DISABLED); 
+0BEE:  CLRF   FCD
+....................    setup_timer_2(T2_DISABLED,0,1); 
+0BF0:  MOVLW  00
+0BF2:  MOVWF  FCA
+0BF4:  MOVLW  00
+0BF6:  MOVWF  FCB
+....................    setup_timer_3(T3_DISABLED|T3_DIV_BY_1); 
+0BF8:  MOVF   FB1,W
+0BFA:  ANDLW  48
+0BFC:  MOVWF  FB1
+....................  
+....................    glcd_init(ON);   //inicializa o display 
+0BFE:  MOVLW  01
+0C00:  MOVWF  06
+0C02:  BRA    08C4
+....................    glcd_fillScreen(0); //limpa display inteiro 
+0C04:  CLRF   07
+0C06:  RCALL  0852
+....................     
+....................    //glcd_text57(34, 55, letA, 1, 1); 
+....................    //glcd_rect(46,53,60,63,1,1); 
+....................    //glcd_text57(48,  55, letB, 1, 0); 
+....................  
+....................    while(TRUE){ 
+....................     
+....................    glcd_imagem(1); 
+0C08:  MOVLW  01
+0C0A:  MOVWF  06
+0C0C:  RCALL  0A62
+....................    delay_ms(3000); 
+0C0E:  MOVLW  0C
+0C10:  MOVWF  06
+0C12:  MOVLW  FA
+0C14:  MOVWF  07
+0C16:  RCALL  0B94
+0C18:  DECFSZ 06,F
+0C1A:  BRA    0C12
+....................    glcd_fillScreen(0); //limpa display inteiro 
+0C1C:  CLRF   07
+0C1E:  RCALL  0852
+....................    glcd_imagem(2); 
+0C20:  MOVLW  02
+0C22:  MOVWF  06
+0C24:  RCALL  0A62
+....................    delay_ms(3000); 
+0C26:  MOVLW  0C
+0C28:  MOVWF  06
+0C2A:  MOVLW  FA
+0C2C:  MOVWF  07
+0C2E:  RCALL  0B94
+0C30:  DECFSZ 06,F
+0C32:  BRA    0C2A
+....................    glcd_fillScreen(0); //limpa display inteiro 
+0C34:  CLRF   07
+0C36:  RCALL  0852
+....................     
+....................    } 
+0C38:  BRA    0C08
+.................... } 
+0C3A:  SLEEP 
+
+Configuration Fuses:
+   Word  1: 2100   XT NOOSCSEN
+   Word  2: 0E0C   NOBROWNOUT WDT128 NOWDT BORV20 PUT
+   Word  3: 0100   CCP2C1
+   Word  4: 0081   STVREN NODEBUG NOLVP
+   Word  5: C00F   NOPROTECT NOCPD NOCPB
+   Word  6: E00F   NOWRT NOWRTD NOWRTB NOWRTC
+   Word  7: 400F   NOEBTR NOEBTRB

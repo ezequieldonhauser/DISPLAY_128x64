@@ -1,0 +1,95 @@
+000     @SCRATCH
+001     @SCRATCH
+001     _RETURN_
+002     @SCRATCH
+003     @SCRATCH
+004     @SCRATCH
+006     glcd_imagem.imagem
+006     glcd_init.mode
+006     MAIN.@SCRATCH1
+007     @delay_ms1.P1
+007     glcd_fillScreen.color
+007     glcd_imagem.i
+008     glcd_fillScreen.i
+008     glcd_imagem.j
+009     glcd_imagem.k
+009     glcd_fillScreen.j
+00A-00B @MUL1616.P1
+00A     glcd_fillScreen.@SCRATCH1
+00A     glcd_imagem.@SCRATCH1
+00B     glcd_imagem.@SCRATCH2
+00C-00D @MUL1616.P1
+00C     glcd_pixel.x
+00C     glcd_imagem.@SCRATCH3
+00D     glcd_pixel.y
+00D     glcd_imagem.@SCRATCH4
+00E     glcd_pixel.color
+00E     @MUL1616.@SCRATCH1
+00E     glcd_imagem.@SCRATCH5
+00F     glcd_pixel.data
+010.0   glcd_pixel.side
+011     glcd_pixel.@SCRATCH1
+012     glcd_readByte.side
+012     glcd_pixel.@SCRATCH2
+013     glcd_readByte.data
+013     glcd_pixel.@SCRATCH3
+014     glcd_pixel.@SCRATCH4
+015     glcd_writeByte.side
+016     glcd_writeByte.data
+F83     PSP_DATA
+FBB     CCP_2_LOW
+FBB-FBC CCP_2
+FBC     CCP_2_HIGH
+FBE     CCP_1_LOW
+FBE-FBF CCP_1
+FBF     CCP_1_HIGH
+FE9-FEA @READ_PROGRAM_MEMORY.P1
+FE9-FEA @WRITE_PROGRAM_MEMORY.P2
+FF6-FF8 @WRITE_PROGRAM_MEMORY.P1
+FF6-FF8 @READ_PROGRAM_MEMORY.P2
+
+ROM Allocation:
+0B94  @delay_ms1
+08C4  glcd_init
+0998  glcd_pixel
+0852  glcd_fillScreen
+0820  glcd_writeByte
+095E  glcd_readByte
+0940  @MUL1616
+0004  imagem_1
+0412  imagem_2
+0A62  glcd_imagem
+0BBC  MAIN
+0BBC  @cinit
+
+Project Directory:
+    C:\Users\User\Desktop\Nova pasta\
+
+Project Files:
+    main.c
+    ..\..\..\..\Program Files (x86)\PICC\devices\18F452.h
+    LIB_HDM64GS12.c
+    LIB_GRAPHICS.C
+    LIB_BMP_LCD.C
+
+Units:
+    C:\Users\User\Desktop\Nova pasta\main.c (main)
+
+Compiler Settings:
+    Processor:      PIC18F452
+    Pointer Size:   16
+    ADC Range:      0-255
+    Opt Level:      9
+    Short,Int,Long: UNSIGNED: 1,8,16
+    Float,Double:   32,32
+
+Output Files:
+    Errors:      main.err
+    Ext Symbols: main.esym
+    INHX32:      main.hex
+    Symbols:     main.sym
+    List:        main.lst
+    Debug/COFF:  main.cof
+    Project:     main.PJT
+    Call Tree:   main.tre
+    Statistics:  main.sta

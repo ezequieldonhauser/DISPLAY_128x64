@@ -1,0 +1,55 @@
+
+ROM used: 3132 (10%)
+          3132 (10%) including unused fragments
+
+          2 Average locations per line
+          11 Average locations per statement
+
+RAM used: 6 (0%) at main() level
+          22 (1%) worst case
+
+Stack used: 3 worst case (out of 31 total available)
+
+Lines Stmts  %   Files
+----- ----- ---  -----
+   63    19   7  main.c
+  335     0   0  ..\..\..\..\Program Files (x86)\PICC\devices\18F452.h
+  351    74  26  LIB_HDM64GS12.c
+  556   167  60  LIB_GRAPHICS.C
+  180    20   7  LIB_BMP_LCD.C
+----- -----
+ 1485   280 Total
+
+Page ROM  %  RAM   Vol Diff  Functions:
+---- --- --- ---   --- ----  ----------
+0     40   1   1             @delay_ms1
+0    124   2   1   555  3.4  glcd_init
+0    202   3   9   764  7.1  glcd_pixel
+0    114   2   4   498  4.8  glcd_fillScreen
+0     50   1   2   257  2.8  glcd_writeByte
+0     58   1   2   318  2.8  glcd_readByte
+0     30   0   5             @MUL1616
+0   1038  17   0             @const155
+0   1038  17   0             @const158
+0    306   5   9   988  7.9  glcd_imagem
+0    128   2   1   442  2.9  MAIN
+
+Program metrics:
+    Functions               7
+    Statements              280
+    Comments                452
+    Volume (V)              5603
+    Difficilty (D)          31.1
+    Effort to implement (E) 174068
+    Time to implement (T)   2 hours, 41 minutes
+    Est Delivered Bugs (B)  1
+    Cyclomatic Complexity   17
+    Maintainability (MI)    70
+
+ Segment     Used  Free
+-----------  ----  ----
+00000-00002     4  0  
+00004-07FFE  3128  29636  
+
+
+
