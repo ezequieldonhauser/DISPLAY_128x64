@@ -10,3 +10,7 @@ on this code every 3 secounds change the image
 
 tutorial:
 https://www.youtube.com/watch?v=Zld1n6RwkAQ
+
+
+-------------------------------------------------------------
+bitcoin donation: bc1qppnaphwqwshk6kqzaal28p5854cntslu0y5dw7
